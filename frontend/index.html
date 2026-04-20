@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pet Market Pro</title>
+</head>
+
+<body>
+
+<h1>🐾 Pet Market</h1>
+
+<!-- LOGIN / REGISTER -->
+<div id="auth">
+<h2>Registro</h2>
+<input id="ruser" placeholder="usuario">
+<input id="rpass" placeholder="contraseña">
+<input id="rroblox" placeholder="usuario Roblox">
+<button onclick="register()">Crear</button>
+
+<h2>Login</h2>
+<input id="user" placeholder="usuario">
+<input id="pass" placeholder="contraseña">
+<button onclick="login()">Entrar</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+
+<h2 id="welcome"></h2>
+<h3 id="saldo"></h3>
+
+<button onclick="depositar()">Agregar $50</button>
+
+<hr>
+
+<h2>Publicar mascota</h2>
+<input id="name" placeholder="nombre">
+<input id="price" placeholder="precio">
+<button onclick="publicar()">Publicar</button>
+
+<hr>
+
+<h2>Mercado</h2>
+<ul id="market"></ul>
+
+</div>
+
+<script>
+let currentUser = null;
+
+// REGISTER
+async function register() {
+  const res = await fetch('/register', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      username: ruser.value,
+      password: rpass.value,
+      robloxUser: rroblox.value
+    })
+  });
+
+  const data = await res.json();
+  alert(data.mensaje || data.error);
+}
+
+// LOGIN
+async function login() {
+  const res = await fetch('/login', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      username: user.value,
+      password: pass.value
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.error) return alert(data.error);
+
+  currentUser = data.username;
+
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+
+  document.getElementById("welcome").innerText =
+    "Bienvenido " + currentUser;
+
+  cargar();
+}
+
+// CARGAR
+async function cargar() {
+  const b = await fetch(`/balance/${currentUser}`);
+  const saldo = await b.json();
+
+  document.getElementById("saldo").innerText =
+    "Saldo: $" + saldo.balance;
+
+  const res = await fetch('/market');
+  const data = await res.json();
+
+  const lista = document.getElementById('market');
+  lista.innerHTML = '';
+
+  data.forEach(p => {
+    const li = document.createElement('li');
+
+    li.innerHTML = `
+      ${p.name} - $${p.price} - dueño: ${p.owner}
+      <button onclick="comprar(${p.id})">Comprar</button>
+    `;
+
+    lista.appendChild(li);
+  });
+}
+
+// PUBLICAR
+async function publicar() {
+  const res = await fetch('/publicar', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      name: name.value,
+      price: price.value,
+      owner: currentUser
+    })
+  });
+
+  const data = await res.json();
+  alert(data.mensaje || data.error);
+}
+
+// COMPRAR
+async function comprar(id) {
+  const res = await fetch('/comprar', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      id,
+      buyer: currentUser
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    alert(data.error);
+  } else {
+    alert("Contacta en Roblox: " + data.contacto);
+    cargar();
+  }
+}
+
+// DEPOSITAR
+async function depositar() {
+  await fetch('/depositar', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      user: currentUser,
+      amount: 50
+    })
+  });
+
+  cargar();
+}
+</script>
+
+</body>
+</html>
