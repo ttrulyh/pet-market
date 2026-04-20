@@ -1,47 +1,39 @@
 const express = require("express");
+const cors = require("cors");
+
 const app = express();
-
-// IMPORTANTE para Render (usa el puerto que te da)
-const PORT = process.env.PORT || 3000;
-
+app.use(cors());
 app.use(express.json());
 
-// Datos de prueba
+// 🔹 Datos de prueba
 let pets = [
-  { id: 1, nombre: "Firulais", edad: 3 },
-  { id: 2, nombre: "Michi", edad: 2 }
+  { id: 1, nombre: "Firulais", tipo: "Perro" },
+  { id: 2, nombre: "Michi", tipo: "Gato" }
 ];
 
-// Ruta principal
+// 🔹 RUTA PRINCIPAL
 app.get("/", (req, res) => {
-  res.send("🐶 Pet Market funcionando");
+  res.send("API funcionando 🚀");
 });
 
-// Obtener todas las mascotas
+// 🔹 OBTENER MASCOTAS
 app.get("/pets", (req, res) => {
   res.json(pets);
 });
 
-// Agregar mascota
+// 🔹 AGREGAR MASCOTA
 app.post("/pets", (req, res) => {
   const nueva = {
     id: pets.length + 1,
     nombre: req.body.nombre,
-    edad: req.body.edad
+    tipo: req.body.tipo
   };
-
   pets.push(nueva);
   res.json(nueva);
 });
 
-// Eliminar mascota
-app.delete("/pets/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  pets = pets.filter(p => p.id !== id);
-  res.send("Mascota eliminada");
-});
-
-// Iniciar servidor
+// 🔹 PUERTO
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Servidor corriendo en puerto " + PORT);
 });
