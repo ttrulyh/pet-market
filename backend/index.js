@@ -1,24 +1,23 @@
 const express = require("express");
-const cors = require("cors");
-
 const app = express();
 
-// Middlewares
-app.use(cors());
+// IMPORTANTE para Render (usa el puerto que te da)
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
 
-// Datos en memoria (simulación de base de datos)
+// Datos de prueba
 let pets = [
-  { id: 1, nombre: "Firulais", tipo: "perro" },
-  { id: 2, nombre: "Michi", tipo: "gato" }
+  { id: 1, nombre: "Firulais", edad: 3 },
+  { id: 2, nombre: "Michi", edad: 2 }
 ];
 
-// Ruta base
+// Ruta principal
 app.get("/", (req, res) => {
-  res.send("API funcionando 🚀");
+  res.send("🐶 Pet Market funcionando");
 });
 
-// Obtener mascotas
+// Obtener todas las mascotas
 app.get("/pets", (req, res) => {
   res.json(pets);
 });
@@ -28,7 +27,7 @@ app.post("/pets", (req, res) => {
   const nueva = {
     id: pets.length + 1,
     nombre: req.body.nombre,
-    tipo: req.body.tipo
+    edad: req.body.edad
   };
 
   pets.push(nueva);
@@ -39,12 +38,10 @@ app.post("/pets", (req, res) => {
 app.delete("/pets/:id", (req, res) => {
   const id = parseInt(req.params.id);
   pets = pets.filter(p => p.id !== id);
-  res.json({ mensaje: "Eliminado" });
+  res.send("Mascota eliminada");
 });
 
-// Puerto
-const PORT = process.env.PORT || 3000;
-
+// Iniciar servidor
 app.listen(PORT, () => {
   console.log("Servidor corriendo en puerto " + PORT);
-});s
+});
